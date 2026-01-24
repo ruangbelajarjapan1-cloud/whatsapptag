@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Tagger</title>
+    <title>WhatsApp Tagger Pro - Design by Wahyu</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
@@ -11,156 +11,120 @@
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; }
         .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
-        
-        /* Area Input & Database */
         .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px solid #c8e6c9; margin-bottom: 15px; }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
         textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: none; }
-        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-save:hover { background: var(--secondary); }
-
-        /* Pengaturan Format */
+        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .settings { display: flex; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 13px; }
         .toggle { display: flex; align-items: center; cursor: pointer; }
         .toggle input { margin-right: 8px; }
-
-        /* Daftar Nama */
         .controls { display: flex; gap: 10px; margin-bottom: 10px; }
         input[type="text"] { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
         .btn-all { background: #eee; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
-        .list-container { max-height: 280px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fafafa; margin-bottom: 20px; }
-        .list-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
-        .list-item:hover { background: #e3f2fd; }
+        .list-container { max-height: 250px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fafafa; margin-bottom: 20px; }
+        .list-item { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
         .list-item input { margin-right: 15px; transform: scale(1.4); }
-
-        /* Tombol Aksi */
-        .main-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; margin-bottom: 10px; transition: 0.3s; }
-        .btn-wa { background-color: var(--accent); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        .main-btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; margin-bottom: 10px; }
+        .btn-wa { background-color: var(--accent); }
         .btn-copy { background-color: #3498db; }
         .btn-copy-alt { background-color: #555; }
         .flex-row { display: flex; gap: 10px; }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <h2>WA Tagger  ✅</h2>
+    <h2>WA Tagger✅</h2>
     <div class="author">Design by Wahyu</div>
 
     <div class="box">
-        <label>Paste Data (Nama + No. Telp):</label>
-        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;Andi 0812xxx&#10;Budi +6281xxx"></textarea>
-        <button class="btn-save" onclick="saveData()">💾 BERSIHKAN & SIMPAN DATA</button>
+        <label>1. Paste Nama & Nomor Disini:</label>
+        <textarea id="rawInput" rows="3" placeholder="Contoh: Budi 0812xxx"></textarea>
+        <button class="btn-save" onclick="saveData()">💾 SIMPAN DAFTAR NAMA</button>
     </div>
 
-    <textarea id="msgInput" rows="2" placeholder="Tulis pesan pengantar (Opsional)..."></textarea>
+    <label>2. Tulis Pesan (Opsional):</label>
+    <textarea id="msgInput" rows="2" placeholder="Contoh: Mohon hadir rapat ya.."></textarea>
 
     <div class="settings">
         <label class="toggle"><input type="checkbox" id="atTag" checked> Gunakan '@'</label>
         <label class="toggle"><input type="checkbox" id="numTag"> Nomor Urut</label>
     </div>
 
+    <label>3. Pilih Orang Yang Akan Di-tag:</label>
     <div class="controls">
         <input type="text" id="search" placeholder="Cari nama..." onkeyup="filter()">
         <button class="btn-all" onclick="toggleAll()">Pilih Semua</button>
     </div>
     <div id="counter" style="text-align:center; font-size:12px; color:#666; margin-bottom:5px;">0 terpilih</div>
-    
     <div class="list-container" id="nameList"></div>
 
-    <button class="main-btn btn-wa" onclick="sendWA()">🚀 KIRIM KE WHATSAPP</button>
     <div class="flex-row">
         <button class="main-btn btn-copy-alt" style="flex:1" onclick="copy(true)">📋 Nama Saja</button>
         <button class="main-btn btn-copy" style="flex:1" onclick="copy(false)">📋 Copy Semua</button>
     </div>
+    <button class="main-btn btn-wa" onclick="sendWA()">🚀 KIRIM KE WHATSAPP</button>
 </div>
 
 <script>
-    // Fungsi Utama
     function cleanName(txt) { return txt.replace(/[0-9\+\-\(\)]/g, '').trim(); }
-
     function saveData() {
         const raw = document.getElementById('rawInput').value;
         const names = raw.split('\n').map(cleanName).filter(n => n !== "");
-        if(names.length === 0) return alert("Paste data dulu!");
+        if(names.length === 0) return alert("Isi data dulu!");
         localStorage.setItem('wa_db_wahyu', JSON.stringify(names));
         render(names);
-        alert("✅ " + names.length + " Nama berhasil disimpan tanpa nomor!");
+        alert("✅ Data disimpan!");
     }
-
     function render(data) {
         const container = document.getElementById('nameList');
-        container.innerHTML = data.map(n => `
-            <div class="list-item" onclick="toggleItem(this)">
-                <input type="checkbox" class="chk" value="${n}">
-                <span>${n}</span>
-            </div>
-        `).join('');
+        container.innerHTML = data.map(n => `<div class="list-item" onclick="toggleItem(this)"><input type="checkbox" class="chk" value="${n}"><span>${n}</span></div>`).join('');
         updateCount();
     }
-
     function toggleItem(div) {
         const cb = div.querySelector('input');
         if(event.target.type !== 'checkbox') cb.checked = !cb.checked;
         updateCount();
     }
-
     function updateCount() {
         const count = document.querySelectorAll('.chk:checked').length;
         document.getElementById('counter').innerText = count + " orang terpilih";
     }
-
     function filter() {
         const q = document.getElementById('search').value.toLowerCase();
-        document.querySelectorAll('.list-item').forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
-        });
+        document.querySelectorAll('.list-item').forEach(item => { item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none'; });
     }
-
     function toggleAll() {
-        const items = document.querySelectorAll('.list-item');
         const cbs = document.querySelectorAll('.chk');
         let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
         cbs.forEach(c => { if(c.parentElement.style.display !== 'none') c.checked = anyUnchecked; });
         updateCount();
     }
-
     function getFinal(onlyNames) {
         const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
         if(selected.length === 0) return null;
-        
         const useAt = document.getElementById('atTag').checked;
         const useNum = document.getElementById('numTag').checked;
         const pesan = document.getElementById('msgInput').value;
-
         const formatted = selected.map((n, i) => {
             let res = useAt ? "@" + n : n;
             return useNum ? (i+1) + ". " + res : res;
         });
-
         const namePart = useNum ? formatted.join('\n') : formatted.join(' ');
         return onlyNames ? namePart : (pesan ? pesan + "\n\n" + namePart : namePart);
     }
-
     function sendWA() {
         const txt = getFinal(false);
-        if(!txt) return alert("Pilih nama!");
+        if(!txt) return alert("Pilih minimal satu nama!");
         window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
     }
-
     function copy(onlyNames) {
         const txt = getFinal(onlyNames);
-        if(!txt) return alert("Pilih nama!");
+        if(!txt) return alert("Pilih minimal satu nama!");
         navigator.clipboard.writeText(txt).then(() => alert("Berhasil disalin!"));
     }
-
     window.onload = () => {
         const saved = localStorage.getItem('wa_db_wahyu');
-        if(saved) {
-            const data = JSON.parse(saved);
-            document.getElementById('rawInput').value = data.join('\n');
-            render(data);
-        }
+        if(saved) { render(JSON.parse(saved)); document.getElementById('rawInput').value = JSON.parse(saved).join('\n'); }
     };
 </script>
 </body>
