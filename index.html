@@ -8,9 +8,21 @@
     <style>
         :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg); padding: 15px; margin: 0; color: #333; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
+        
+        /* Tombol Help */
+        .btn-help { position: absolute; top: 20px; right: 20px; background: #ddd; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; color: #555; }
+        
         h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; }
         .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
+        
+        /* Modal Help */
+        #helpModal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .modal-content { background: white; margin: 15% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; }
+        .modal-content h3 { color: var(--primary); margin-top: 0; }
+        .modal-content ol { padding-left: 20px; line-height: 1.6; font-size: 14px; }
+        .btn-close { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+
         .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px solid #c8e6c9; margin-bottom: 15px; }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
         textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: none; }
@@ -32,9 +44,25 @@
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>WA Tagger✅</h2>
+    <button class="btn-help" onclick="toggleHelp(true)">?</button>
+    <h2>WA Tagger Pro ✅</h2>
     <div class="author">Design by Wahyu</div>
+
+    <div id="helpModal">
+        <div class="modal-content">
+            <h3>Cara Penggunaan:</h3>
+            <ol>
+                <li><b>Input Data:</b> Paste daftar Nama & Nomor ke kotak hijau, lalu klik <b>Simpan</b>. (Nomor akan dibuang otomatis).</li>
+                <li><b>Pesan:</b> Isi pesan pengantar (opsional).</li>
+                <li><b>Pilih Nama:</b> Centang nama yang ingin di-tag.</li>
+                <li><b>Kirim:</b> Klik tombol <b>Kirim ke WhatsApp</b> untuk membagikan.</li>
+            </ol>
+            <p style="font-size:11px; color:#888;">*Data disimpan di HP Anda masing-masing.</p>
+            <button class="btn-close" onclick="toggleHelp(false)">Tutup</button>
+        </div>
+    </div>
 
     <div class="box">
         <label>1. Paste Nama & Nomor Disini:</label>
@@ -43,14 +71,14 @@
     </div>
 
     <label>2. Tulis Pesan (Opsional):</label>
-    <textarea id="msgInput" rows="2" placeholder="Contoh: Mohon hadir rapat ya.."></textarea>
+    <textarea id="msgInput" rows="2" placeholder="Contoh: Info Rapat Penting.."></textarea>
 
     <div class="settings">
         <label class="toggle"><input type="checkbox" id="atTag" checked> Gunakan '@'</label>
         <label class="toggle"><input type="checkbox" id="numTag"> Nomor Urut</label>
     </div>
 
-    <label>3. Pilih Orang Yang Akan Di-tag:</label>
+    <label>3. Pilih Orang Yang Di-tag:</label>
     <div class="controls">
         <input type="text" id="search" placeholder="Cari nama..." onkeyup="filter()">
         <button class="btn-all" onclick="toggleAll()">Pilih Semua</button>
@@ -66,6 +94,7 @@
 </div>
 
 <script>
+    function toggleHelp(show) { document.getElementById('helpModal').style.display = show ? 'block' : 'none'; }
     function cleanName(txt) { return txt.replace(/[0-9\+\-\(\)]/g, '').trim(); }
     function saveData() {
         const raw = document.getElementById('rawInput').value;
@@ -95,6 +124,7 @@
     }
     function toggleAll() {
         const cbs = document.querySelectorAll('.chk');
+        if(cbs.length === 0) return;
         let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
         cbs.forEach(c => { if(c.parentElement.style.display !== 'none') c.checked = anyUnchecked; });
         updateCount();
