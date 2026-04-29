@@ -30,6 +30,10 @@
         .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; margin-bottom: 10px; }
         .btn-wa { background-color: var(--accent); }
         .btn-batch-copy { background-color: #3498db; font-size: 11px; padding: 8px; }
+        
+        /* Tambahan styling kecil agar list panduan lebih rapi */
+        .modal-content ol { padding-left: 20px; margin-bottom: 15px; font-size: 14px; line-height: 1.5; }
+        .modal-content li { margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -41,13 +45,17 @@
 
     <div id="helpModal">
         <div class="modal-content">
-            <h3>Trik Tag Biru:</h3>
+            <h3 style="color: var(--primary); margin-top: 0;">Panduan Penggunaan:</h3>
             <ol>
-                <li>Input Nama & (Nomor HP ATAU NIP/ARN).</li>
-                <li>Gunakan tombol biru <b>"Salin Nama..."</b> per 20 orang.</li>
-                <li>Buka WhatsApp, <b>Tempel (Paste)</b> di grup.</li>
-                <li>Jika tag berupa Nomor HP, tekan <b>Spasi</b> di akhir teks.</li>
-                <li>Jika tag berupa NIP/ARN, hapus tanda <b>#</b> di ujungnya agar muncul pilihan nama.</li>
+                <li>Centang anggota yang ingin di-tag dari daftar.</li>
+                <li><b>Pilih Metode Kirim:</b><br>
+                    👉 Klik <b>"Kirim Semua"</b> untuk langsung membuka WhatsApp.<br>
+                    👉 ATAU klik tombol biru <b>"Salin..."</b> jika ingin menempel (paste) manual di grup.
+                </li>
+                <li><b>Trik Tag Biru di WA:</b><br>
+                    ✅ <b>Nomor HP:</b> Tekan tombol <b>Spasi</b> di akhir teks sebelum dikirim.<br>
+                    ✅ <b>NIP/ARN:</b> Hapus tanda <b>#</b> di ujung teks agar WA memunculkan pilihan nama kontak.
+                </li>
             </ol>
             <button class="btn-close" onclick="toggleHelp(false)">Tutup</button>
         </div>
@@ -88,7 +96,6 @@
     
     function saveData() {
         const raw = document.getElementById('rawInput').value;
-        // PERBAIKAN: Menghapus angka urut bawaan (contoh: "194. ") dari input agar tidak dobel
         const items = raw.split('\n')
             .map(n => n.trim().replace(/^\d+[\.\)]\s*/, '')) 
             .filter(n => n !== "");
@@ -166,12 +173,9 @@
                 if (words.length > 0) {
                     const lastWord = words.pop(); 
                     
-                    // SMART TAGGING
                     if (/[A-Za-z]/.test(lastWord)) {
-                        // Jika NIP/ARN: Jangan tampilkan nama agar WA tidak membuatnya dobel saat ditag
                         res = '@' + lastWord + '#';
                     } else {
-                        // Jika Nomor HP: Tetap tampilkan nama di depannya
                         res = (words.length > 0 ? words.join(' ') + ' ' : '') + '@' + lastWord;
                     }
                 }
