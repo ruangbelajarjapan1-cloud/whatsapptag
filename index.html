@@ -3,134 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NIP Converter Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>Format NIP Converter</title>
     <style>
-        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
-        body { font-family: 'Roboto', sans-serif; background-color: var(--bg); padding: 15px; margin: 0; color: #333; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
-        h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; }
-        .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
-        .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px solid #c8e6c9; margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
-        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; min-height: 120px; }
-        textarea:focus { outline: none; border-color: var(--secondary); }
-        .btn-action { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-action:hover { background: var(--secondary); }
-        .btn-wa { background-color: var(--accent); }
-        .btn-wa:hover { background-color: #128C7E; }
-        .btn-copy { background-color: #3498db; }
-        .btn-copy:hover { background-color: #2980b9; }
-        .btn-clear { background-color: #e74c3c; margin-top: 10px; }
-        .btn-clear:hover { background-color: #c0392b; }
-        .result-info { font-size: 13px; text-align: center; margin-bottom: 10px; font-weight: bold; min-height: 15px; }
-        .flex-group { display: flex; gap: 10px; margin-top: 10px; }
-        .flex-group button { margin-top: 0; flex: 1; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.3s;
+            line-height: 1.6;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-convert {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-convert:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-copy {
+            background: #4CAF50;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-copy:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-share {
+            background: #25D366;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-share:hover {
+            background: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.4);
+        }
+
+        .btn-clear {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .output-section {
+            margin-top: 20px;
+        }
+
+        .result-info {
+            background: #f0f0f0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        #outputArea {
+            background: #f9f9f9;
+            font-family: 'Courier New', monospace;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            button {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>NIP Converter Pro</h2>
-    <div class="author">Design by Wahyu</div>
-
-    <div class="box">
-        <label>1. Paste Data (Nama dan NIP):</label>
-        <textarea id="inputArea" placeholder="Contoh:&#10;1. NAMA ARN251-29xxx&#10;2. NAMA ARN251-30xxx"></textarea>
-        <button class="btn-action" onclick="convertNIP()">🔄 KONVERSI SEKARANG</button>
-    </div>
-
-    <label>2. Hasil Konversi (Siap Tag):</label>
-    <div class="result-info" id="resultInfo"></div>
-    <textarea id="outputArea" readonly placeholder="Hasil tanpa tanda # akan muncul di sini..."></textarea>
-
-    <div class="flex-group">
-        <button class="btn-action btn-copy" onclick="copyResult()">📋 SALIN HASIL</button>
-        <button class="btn-action btn-wa" onclick="shareToWA()">🚀 KIRIM KE WA</button>
-    </div>
-    <button class="btn-action btn-clear" onclick="clearAll()">🗑️ BERSIHKAN DATA</button>
-</div>
-
-<script>
-    function convertNIP() {
-        const input = document.getElementById('inputArea').value.trim();
-        const outputArea = document.getElementById('outputArea');
-        const resultInfo = document.getElementById('resultInfo');
+    <div class="container">
+        <h1>📋 Format NIP Converter</h1>
+        <p class="subtitle">Ahmad Abu Fatih</p>
         
-        if (!input) {
-            alert('⚠️ Silakan masukkan data terlebih dahulu!');
-            return;
-        }
+        <div class="input-section">
+            <label for="inputArea">📝 Paste Data (Nama dan NIP):</label>
+            <textarea 
+                id="inputArea" 
+                placeholder="Contoh:&#10;1. NAMA ARN251-29xxx&#10;2. NAMA ARN251-29xxx"
+            ></textarea>
+        </div>
 
-        const lines = input.split('\n');
-        const results = [];
-        let count = 0;
+        <div class="button-group">
+            <button class="btn-convert" onclick="convertNIP()">
+                🔄 Konversi
+            </button>
+            <button class="btn-copy" onclick="copyResult()">
+                📋 Copy Hasil
+            </button>
+            <button class="btn-share" onclick="shareToWA()">
+                💬 Share ke WhatsApp
+            </button>
+            <button class="btn-clear" onclick="clearAll()">
+                🗑️ Clear
+            </button>
+        </div>
 
-        lines.forEach(line => {
-            if (!line.trim()) return;
+        <div class="output-section">
+            <label for="outputArea">✅ Hasil Konversi:</label>
+            <div class="result-info" id="resultInfo"></div>
+            <textarea id="outputArea" readonly placeholder="Hasil akan muncul di sini..."></textarea>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        function convertNIP() {
+            const input = document.getElementById('inputArea').value.trim();
+            const outputArea = document.getElementById('outputArea');
+            const resultInfo = document.getElementById('resultInfo');
             
-            // Regex mencari pola NIP seperti ARN251-29xxx
-            const nipMatch = line.match(/[A-Z]+\d+[\-]?\d+/);
-            
-            if (nipMatch) {
-                const nip = nipMatch[0];
-                // TANDA '#' DIHAPUS DI SINI AGAR LANGSUNG BIRU DI WA
-                const formattedNIP = `@${nip}`; 
-                results.push(formattedNIP);
-                count++;
+            if (!input) {
+                showNotification('⚠️ Silakan masukkan data terlebih dahulu!', 'error');
+                return;
             }
-        });
 
-        if (results.length === 0) {
-            outputArea.value = '';
-            resultInfo.textContent = '❌ Tidak ada NIP yang ditemukan!';
-            resultInfo.style.color = '#e74c3c';
-        } else {
-            outputArea.value = results.join('\n');
-            resultInfo.textContent = `✅ Berhasil mengkonversi ${count} NIP`;
-            resultInfo.style.color = 'var(--primary)';
+            // Split input menjadi baris-baris
+            const lines = input.split('\n');
+            const results = [];
+            let count = 0;
+
+            lines.forEach(line => {
+                // Skip baris kosong
+                if (!line.trim()) return;
+                
+                // Cari NIP dalam format ARN... atau NIP lainnya
+                const nipMatch = line.match(/[A-Z]+\d+[\-]?\d+/);
+                
+                if (nipMatch) {
+                    const nip = nipMatch[0];
+                    // PERBAIKAN LOGIKA: Tanda # dihapus agar WA bisa langsung membaca tag-nya
+                    const formattedNIP = `@${nip}`;
+                    results.push(formattedNIP);
+                    count++;
+                }
+            });
+
+            if (results.length === 0) {
+                outputArea.value = '';
+                resultInfo.textContent = '❌ Tidak ada NIP yang ditemukan!';
+                resultInfo.style.color = '#f44336';
+            } else {
+                outputArea.value = results.join('\n');
+                resultInfo.textContent = `✅ Berhasil mengkonversi ${count} NIP`;
+                resultInfo.style.color = '#4CAF50';
+                showNotification(`✅ ${count} NIP berhasil dikonversi!`, 'success');
+            }
         }
-    }
 
-    function copyResult() {
-        const text = document.getElementById('outputArea').value;
-        if (!text) {
-            alert('⚠️ Tidak ada hasil untuk disalin!');
-            return;
+        function copyResult() {
+            const outputArea = document.getElementById('outputArea');
+            const text = outputArea.value;
+            
+            if (!text) {
+                showNotification('⚠️ Tidak ada hasil untuk dicopy!', 'error');
+                return;
+            }
+
+            // Menggunakan Clipboard API
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('📋 Hasil berhasil dicopy ke clipboard!', 'success');
+            }).catch(err => {
+                // Fallback untuk browser lama
+                outputArea.select();
+                document.execCommand('copy');
+                showNotification('📋 Hasil berhasil dicopy!', 'success');
+            });
         }
 
-        navigator.clipboard.writeText(text).then(() => {
-            alert('📋 Hasil berhasil disalin!\n\n💡 Tips: Paste di grup WA, lalu tekan SPASI di akhir teks agar tag berubah menjadi biru.');
-        }).catch(err => {
-            document.getElementById('outputArea').select();
-            document.execCommand('copy');
-            alert('📋 Hasil berhasil disalin!');
-        });
-    }
+        function shareToWA() {
+            const outputArea = document.getElementById('outputArea');
+            const text = outputArea.value;
+            
+            if (!text) {
+                showNotification('⚠️ Tidak ada hasil untuk dibagikan!', 'error');
+                return;
+            }
 
-    function shareToWA() {
-        const text = document.getElementById('outputArea').value;
-        if (!text) {
-            alert('⚠️ Tidak ada hasil untuk dibagikan!');
-            return;
+            // Encode text untuk URL WhatsApp
+            const encodedText = encodeURIComponent(text);
+            const waURL = `https://wa.me/?text=${encodedText}`;
+            
+            // Buka WhatsApp di tab baru
+            window.open(waURL, '_blank');
         }
-        window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
-    }
 
-    function clearAll() {
-        if(confirm('Apakah Anda yakin ingin menghapus semua data?')) {
+        function clearAll() {
             document.getElementById('inputArea').value = '';
             document.getElementById('outputArea').value = '';
             document.getElementById('resultInfo').textContent = '';
+            showNotification('🗑️ Semua data telah dihapus!', 'success');
         }
-    }
 
-    // Auto-load contoh untuk mempermudah tes
-    window.addEventListener('load', function() {
-        const exampleData = `1. NAMA ARN251-29xxx\n2. NAMA ARN251-30xxx`;
-        document.getElementById('inputArea').value = exampleData;
-    });
-</script>
+        // Keyboard shortcut Ctrl+Enter untuk convert
+        document.getElementById('inputArea').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                convertNIP();
+            }
+        });
 
+        // Load contoh data
+        window.addEventListener('load', function() {
+            const exampleData = `1. NAMA ARN251-29xxx\n2. NAMA ARN251-29xxx`;
+            document.getElementById('inputArea').value = exampleData;
+        });
+    </script>
 </body>
 </html>
