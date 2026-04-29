@@ -37,7 +37,7 @@
 <div class="container">
     <button class="btn-help" onclick="toggleHelp(true)">?</button>
     <h2>WA Tagger Pro </h2>
-    <div class="author">Design by setiawan</div>
+    <div class="author">Design by Wahyu</div>
 
     <div id="helpModal">
         <div class="modal-content">
@@ -55,7 +55,7 @@
     <div class="box">
         <label>1. Input Data Nama & NIP:</label>
         <textarea id="rawInput" rows="3" placeholder="Contoh: 1. NAMA ARN251-29xxx"></textarea>
-        <button class="btn-save" onclick="saveData()">💾 SIMPAN DAFTAR</button>
+        <button class="btn-save" type="button" onclick="saveData()">💾 SIMPAN DAFTAR</button>
     </div>
 
     <label>2. Pesan (Opsional):</label>
@@ -69,7 +69,7 @@
     <label>3. Pilih Anggota:</label>
     <div style="display:flex; gap:10px; margin-bottom:10px;">
         <input type="text" id="search" placeholder="Cari..." onkeyup="filter()" style="flex:1; padding:8px; border-radius:8px; border:1px solid #ddd;">
-        <button onclick="toggleAll()" style="padding:8px; border-radius:8px; border:none; cursor:pointer;">Pilih Semua</button>
+        <button type="button" onclick="toggleAll()" style="padding:8px; border-radius:8px; border:none; cursor:pointer; font-weight: bold; background: #ddd;">Pilih Semua</button>
     </div>
     
     <div class="list-container" id="nameList"></div>
@@ -79,13 +79,13 @@
         <div class="batch-grid" id="batchButtons"></div>
     </div>
 
-    <button class="main-btn btn-wa" onclick="sendWA()" style="margin-top:20px;">🚀 KIRIM SEMUA (LINK LANGSUNG)</button>
+    <button class="main-btn btn-wa" type="button" onclick="sendWA()" style="margin-top:20px;">🚀 KIRIM SEMUA (LINK LANGSUNG)</button>
 </div>
 
 <script>
     function toggleHelp(show) { document.getElementById('helpModal').style.display = show ? 'block' : 'none'; }
     
-    // LOGIKA YANG DIGANTI: Mengekstrak hanya NIP-nya saja dari teks yang dipaste
+    // Mengekstrak hanya NIP-nya saja dari teks yang dipaste
     function extractNIP(txt) { 
         const match = txt.match(/[A-Z]+\d+[\-]?\d+/);
         return match ? match[0] : ""; 
@@ -93,22 +93,31 @@
     
     function saveData() {
         const raw = document.getElementById('rawInput').value;
-        // Hanya menyimpan NIP yang berhasil diekstrak
         const names = raw.split('\n').map(extractNIP).filter(n => n !== "");
+        
+        if(names.length === 0) {
+            alert("⚠️ Tidak ada format NIP (seperti ARN251-29xxx) yang ditemukan dalam teks!");
+            return;
+        }
+
         localStorage.setItem('wa_db_wahyu', JSON.stringify(names));
         render(names);
-        alert("✅ Data NIP disimpan!");
+        alert("✅ Data NIP berhasil disimpan dan siap dipilih!");
     }
 
     function render(data) {
         const container = document.getElementById('nameList');
-        container.innerHTML = data.map(n => `<div class="list-item" onclick="toggleItem(this)"><input type="checkbox" class="chk" value="${n}"><span>${n}</span></div>`).join('');
+        // PERBAIKAN BUG: Menambahkan parameter event di fungsi onclick
+        container.innerHTML = data.map(n => `<div class="list-item" onclick="toggleItem(this, event)"><input type="checkbox" class="chk" value="${n}"><span>${n}</span></div>`).join('');
         updateCount();
     }
 
-    function toggleItem(div) {
+    function toggleItem(div, e) {
         const cb = div.querySelector('input');
-        if(event.target.type !== 'checkbox') cb.checked = !cb.checked;
+        // Mencegah konflik ketika yang diklik adalah checkbox-nya langsung
+        if(e && e.target && e.target.type !== 'checkbox') {
+            cb.checked = !cb.checked;
+        }
         updateCount();
     }
 
@@ -134,12 +143,27 @@
         }
     }
 
+    function toggleAll() {
+        const cbs = document.querySelectorAll('.chk');
+        if(cbs.length === 0) {
+            alert("⚠️ Belum ada daftar yang bisa dipilih! Masukkan data lalu tekan 'SIMPAN DAFTAR' dulu.");
+            return;
+        }
+        
+        let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
+        cbs.forEach(c => { 
+            if(c.parentElement.style.display !== 'none') {
+                c.checked = anyUnchecked; 
+            }
+        });
+        updateCount();
+    }
+
     function formatText(names) {
         const useAt = document.getElementById('atTag').checked;
         const useNum = document.getElementById('numTag').checked;
         const pesan = document.getElementById('msgInput').value;
         const formatted = names.map((n, i) => {
-            // TIDAK ADA TANDA # DI SINI. Jika dicentang '@', langsung format @ARN...
             let res = useAt ? "@" + n : n;
             return useNum ? (i+1) + ". " + res : res;
         });
@@ -151,12 +175,17 @@
         const txt = formatText(names);
         navigator.clipboard.writeText(txt).then(() => {
             alert("✅ Teks Berhasil Disalin!\n\nSilakan buka WhatsApp dan Tempel (Paste) di grup. (Tekan Spasi agar tag langsung biru)");
+        }).catch(() => {
+            alert("Gagal menyalin teks, mohon coba lagi.");
         });
     }
 
     function sendWA() {
         const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
-        if(selected.length === 0) return alert("Pilih nama!");
+        if(selected.length === 0) {
+            alert("⚠️ Centang minimal satu nama/NIP dulu sebelum dikirim!");
+            return;
+        }
         const txt = formatText(selected);
         window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
     }
@@ -168,17 +197,14 @@
         });
     }
 
-    function toggleAll() {
-        const cbs = document.querySelectorAll('.chk');
-        if(cbs.length === 0) return;
-        let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
-        cbs.forEach(c => { if(c.parentElement.style.display !== 'none') c.checked = anyUnchecked; });
-        updateCount();
-    }
-
     window.onload = () => {
         const saved = localStorage.getItem('wa_db_wahyu');
-        if(saved) { render(JSON.parse(saved)); document.getElementById('rawInput').value = JSON.parse(saved).join('\n'); }
+        if(saved) { 
+            const parsedData = JSON.parse(saved);
+            render(parsedData); 
+            // Menampilkan contoh dummy agar tidak kosong saat load jika belum ada data valid sebelumnya
+            document.getElementById('rawInput').value = parsedData.join('\n'); 
+        }
     };
 </script>
 </body>
