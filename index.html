@@ -55,7 +55,7 @@
 
     <div class="box">
         <label>1. Input Data Nama & (No HP / NIP):</label>
-        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;YUSUF 6281224961895&#10;NAMA ARN251-29xxx"></textarea>
+        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;YUSUF 6281224961895&#10;NAMA ARN-22222222"></textarea>
         <button class="btn-save" type="button" onclick="saveData()">💾 SIMPAN DAFTAR</button>
     </div>
 
@@ -123,12 +123,13 @@
             batchSection.style.display = 'block';
             grid.innerHTML = '';
             const batchSize = 20;
+            // PERBAIKAN BATCH NUMBERS: Meneruskan indeks 'i' sebagai awal nomor urut
             for (let i = 0; i < selected.length; i += batchSize) {
                 const batch = selected.slice(i, i + batchSize);
                 const btn = document.createElement('button');
                 btn.className = 'main-btn btn-batch-copy';
                 btn.innerText = `Salin Orang ${i+1}-${Math.min(i + batchSize, selected.length)}`;
-                btn.onclick = () => copyBatch(batch);
+                btn.onclick = () => copyBatch(batch, i); // Meneruskan 'i' agar nomor urut berlanjut
                 grid.appendChild(btn);
             }
         } else {
@@ -152,31 +153,38 @@
         updateCount();
     }
 
-    function formatText(names) {
+    // PERBAIKAN LOGIKA TEXT: Menjamin nomor urut berfungsi dan mendeteksi ARN- apapun dengan tepat
+    function formatText(names, startIndex = 0) {
         const useAt = document.getElementById('atTag').checked;
         const useNum = document.getElementById('numTag').checked;
         const pesan = document.getElementById('msgInput').value;
         const formatted = names.map((n, i) => {
             let res = n;
             if (useAt) {
-                // Logika Multi-Fungsi:
-                // 1. Cek apakah ada pola huruf+angka (NIP seperti ARN251-29xxx)
-                if (/[A-Za-z]+\d+[\-]?\d+/.test(res)) {
-                    res = res.replace(/([A-Za-z]+\d+[\-]?\d+)/, '@$1#');
-                } 
-                // 2. Jika tidak ada, asumsi itu Nomor HP (deretan angka di belakang)
-                else {
-                    res = res.replace(/(\S*\d\S*)$/, '@$1');
+                const words = res.split(/\s+/); // Memecah kata dari spasi
+                if (words.length > 0) {
+                    const lastWord = words.pop(); // Mengambil kata paling belakang (NIP/No. HP)
+                    
+                    // Mengecek apakah kata terakhir mengandung huruf (untuk format NIP/ARN)
+                    if (/[A-Za-z]/.test(lastWord)) {
+                        res = (words.length > 0 ? words.join(' ') + ' ' : '') + '@' + lastWord + '#';
+                    } else {
+                        // Jika hanya murni angka (untuk format Nomor HP)
+                        res = (words.length > 0 ? words.join(' ') + ' ' : '') + '@' + lastWord;
+                    }
                 }
             }
-            return useNum ? (i+1) + ". " + res : res;
+            // Menerapkan nomor urut sesuai kelanjutan batch
+            return useNum ? (startIndex + i + 1) + ". " + res : res;
         });
-        const namePart = useNum ? formatted.join('\n') : formatted.join(' ');
+        
+        // Memastikan output selalu turun baris (enter) agar daftar tidak menyamping/berantakan di WA
+        const namePart = formatted.join('\n');
         return pesan ? pesan + "\n\n" + namePart : namePart;
     }
 
-    function copyBatch(names) {
-        const txt = formatText(names);
+    function copyBatch(names, startIndex = 0) {
+        const txt = formatText(names, startIndex);
         navigator.clipboard.writeText(txt).then(() => {
             alert("✅ Teks Berhasil Disalin!\n\nSilakan Tempel di WA.\n- Nomor HP: Tekan Spasi di akhir.\n- NIP: Hapus tanda '#' di ujungnya.");
         });
@@ -188,7 +196,7 @@
             alert("⚠️ Pilih minimal satu data dulu!");
             return;
         }
-        const txt = formatText(selected);
+        const txt = formatText(selected, 0); // Memulai nomor urut dari 0
         window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
     }
 
