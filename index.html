@@ -55,7 +55,7 @@
 
     <div class="box">
         <label>1. Input Data Nama & (No HP / NIP):</label>
-        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;YUSUF 6281224961895&#10;NAMA ARN-22222222"></textarea>
+        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;YUSUF 6281224961895&#10;194. ZICO AL GHANI ARN-22222222"></textarea>
         <button class="btn-save" type="button" onclick="saveData()">💾 SIMPAN DAFTAR</button>
     </div>
 
@@ -88,7 +88,10 @@
     
     function saveData() {
         const raw = document.getElementById('rawInput').value;
-        const items = raw.split('\n').map(n => n.trim()).filter(n => n !== "");
+        // PERBAIKAN: Menghapus angka urut bawaan (contoh: "194. ") dari input agar tidak dobel
+        const items = raw.split('\n')
+            .map(n => n.trim().replace(/^\d+[\.\)]\s*/, '')) 
+            .filter(n => n !== "");
         
         if(items.length === 0) {
             alert("⚠️ Masukkan data terlebih dahulu!");
@@ -123,13 +126,12 @@
             batchSection.style.display = 'block';
             grid.innerHTML = '';
             const batchSize = 20;
-            // PERBAIKAN BATCH NUMBERS: Meneruskan indeks 'i' sebagai awal nomor urut
             for (let i = 0; i < selected.length; i += batchSize) {
                 const batch = selected.slice(i, i + batchSize);
                 const btn = document.createElement('button');
                 btn.className = 'main-btn btn-batch-copy';
                 btn.innerText = `Salin Orang ${i+1}-${Math.min(i + batchSize, selected.length)}`;
-                btn.onclick = () => copyBatch(batch, i); // Meneruskan 'i' agar nomor urut berlanjut
+                btn.onclick = () => copyBatch(batch, i); 
                 grid.appendChild(btn);
             }
         } else {
@@ -153,7 +155,6 @@
         updateCount();
     }
 
-    // PERBAIKAN LOGIKA TEXT: Menjamin nomor urut berfungsi dan mendeteksi ARN- apapun dengan tepat
     function formatText(names, startIndex = 0) {
         const useAt = document.getElementById('atTag').checked;
         const useNum = document.getElementById('numTag').checked;
@@ -161,24 +162,23 @@
         const formatted = names.map((n, i) => {
             let res = n;
             if (useAt) {
-                const words = res.split(/\s+/); // Memecah kata dari spasi
+                const words = res.split(/\s+/);
                 if (words.length > 0) {
-                    const lastWord = words.pop(); // Mengambil kata paling belakang (NIP/No. HP)
+                    const lastWord = words.pop(); 
                     
-                    // Mengecek apakah kata terakhir mengandung huruf (untuk format NIP/ARN)
+                    // SMART TAGGING
                     if (/[A-Za-z]/.test(lastWord)) {
-                        res = (words.length > 0 ? words.join(' ') + ' ' : '') + '@' + lastWord + '#';
+                        // Jika NIP/ARN: Jangan tampilkan nama agar WA tidak membuatnya dobel saat ditag
+                        res = '@' + lastWord + '#';
                     } else {
-                        // Jika hanya murni angka (untuk format Nomor HP)
+                        // Jika Nomor HP: Tetap tampilkan nama di depannya
                         res = (words.length > 0 ? words.join(' ') + ' ' : '') + '@' + lastWord;
                     }
                 }
             }
-            // Menerapkan nomor urut sesuai kelanjutan batch
             return useNum ? (startIndex + i + 1) + ". " + res : res;
         });
         
-        // Memastikan output selalu turun baris (enter) agar daftar tidak menyamping/berantakan di WA
         const namePart = formatted.join('\n');
         return pesan ? pesan + "\n\n" + namePart : namePart;
     }
@@ -196,7 +196,7 @@
             alert("⚠️ Pilih minimal satu data dulu!");
             return;
         }
-        const txt = formatText(selected, 0); // Memulai nomor urut dari 0
+        const txt = formatText(selected, 0);
         window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
     }
 
