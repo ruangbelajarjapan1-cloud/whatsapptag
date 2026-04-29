@@ -3,176 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WA Tagger</title>
+    <title>NIP Converter Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg); padding: 15px; margin: 0; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
-        .btn-help { position: absolute; top: 20px; right: 20px; background: #ddd; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; color: #555; }
         h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; }
         .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
-        #helpModal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 15% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; }
-        .btn-close { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; }
         .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px solid #c8e6c9; margin-bottom: 15px; }
         label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
-        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: none; }
-        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .settings { display: flex; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 13px; }
-        .toggle { display: flex; align-items: center; cursor: pointer; }
-        .list-container { max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fafafa; margin-bottom: 15px; }
-        .list-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .list-item input { margin-right: 15px; transform: scale(1.3); }
-        .batch-area { margin-top: 10px; border-top: 2px dashed #ddd; padding-top: 15px; }
-        .batch-label { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 10px; display: block; text-align: center;}
-        .batch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; margin-bottom: 10px; }
+        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: vertical; min-height: 120px; }
+        textarea:focus { outline: none; border-color: var(--secondary); }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
+        .btn-action:hover { background: var(--secondary); }
         .btn-wa { background-color: var(--accent); }
-        .btn-batch-copy { background-color: #3498db; font-size: 11px; padding: 8px; }
+        .btn-wa:hover { background-color: #128C7E; }
+        .btn-copy { background-color: #3498db; }
+        .btn-copy:hover { background-color: #2980b9; }
+        .btn-clear { background-color: #e74c3c; margin-top: 10px; }
+        .btn-clear:hover { background-color: #c0392b; }
+        .result-info { font-size: 13px; text-align: center; margin-bottom: 10px; font-weight: bold; min-height: 15px; }
+        .flex-group { display: flex; gap: 10px; margin-top: 10px; }
+        .flex-group button { margin-top: 0; flex: 1; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <button class="btn-help" onclick="toggleHelp(true)">?</button>
-    <h2>WA Tagger Pro </h2>
+    <h2>NIP Converter Pro</h2>
     <div class="author">Design by Wahyu</div>
 
-    <div id="helpModal">
-        <div class="modal-content">
-            <h3>Trik Tag Biru:</h3>
-            <ol>
-                <li>Pilih nama-nama anggota.</li>
-                <li>Gunakan tombol biru <b>"Salin Nama..."</b> per 20 orang.</li>
-                <li>Buka WhatsApp, <b>Tempel (Paste)</b> di grup.</li>
-                <li>Jika belum biru, tekan <b>Spasi</b> di akhir teks sebelum kirim.</li>
-            </ol>
-            <button class="btn-close" onclick="toggleHelp(false)">Tutup</button>
-        </div>
-    </div>
-
     <div class="box">
-        <label>1. Input Data Nama & Nomor:</label>
-        <textarea id="rawInput" rows="3" placeholder="Contoh: Andi 0812xxx"></textarea>
-        <button class="btn-save" onclick="saveData()">💾 SIMPAN DAFTAR</button>
+        <label>1. Paste Data (Nama dan NIP):</label>
+        <textarea id="inputArea" placeholder="Contoh:&#10;1. NAMA ARN251-29xxx&#10;2. NAMA ARN251-30xxx"></textarea>
+        <button class="btn-action" onclick="convertNIP()">🔄 KONVERSI SEKARANG</button>
     </div>
 
-    <label>2. Pesan (Opsional):</label>
-    <textarea id="msgInput" rows="2" placeholder="Tulis pesan pengantar..."></textarea>
+    <label>2. Hasil Konversi (Siap Tag):</label>
+    <div class="result-info" id="resultInfo"></div>
+    <textarea id="outputArea" readonly placeholder="Hasil tanpa tanda # akan muncul di sini..."></textarea>
 
-    <div class="settings">
-        <label class="toggle"><input type="checkbox" id="atTag" checked> Pakai '@'</label>
-        <label class="toggle"><input type="checkbox" id="numTag"> No. Urut</label>
+    <div class="flex-group">
+        <button class="btn-action btn-copy" onclick="copyResult()">📋 SALIN HASIL</button>
+        <button class="btn-action btn-wa" onclick="shareToWA()">🚀 KIRIM KE WA</button>
     </div>
-
-    <label>3. Pilih Anggota:</label>
-    <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <input type="text" id="search" placeholder="Cari..." onkeyup="filter()" style="flex:1; padding:8px; border-radius:8px; border:1px solid #ddd;">
-        <button onclick="toggleAll()" style="padding:8px; border-radius:8px; border:none; cursor:pointer;">Pilih Semua</button>
-    </div>
-    
-    <div class="list-container" id="nameList"></div>
-
-    <div class="batch-area" id="batchSection" style="display:none;">
-        <span class="batch-label">📋 Salin Per 20 Nama (Lebih Ampuh):</span>
-        <div class="batch-grid" id="batchButtons"></div>
-    </div>
-
-    <button class="main-btn btn-wa" onclick="sendWA()" style="margin-top:20px;">🚀 KIRIM SEMUA (LINK LANGSUNG)</button>
+    <button class="btn-action btn-clear" onclick="clearAll()">🗑️ BERSIHKAN DATA</button>
 </div>
 
 <script>
-    function toggleHelp(show) { document.getElementById('helpModal').style.display = show ? 'block' : 'none'; }
-    function cleanName(txt) { return txt.replace(/[0-9\+\-\(\)]/g, '').trim(); }
-    
-    function saveData() {
-        const raw = document.getElementById('rawInput').value;
-        const names = raw.split('\n').map(cleanName).filter(n => n !== "");
-        localStorage.setItem('wa_db_wahyu', JSON.stringify(names));
-        render(names);
-        alert("✅ Data disimpan!");
-    }
-
-    function render(data) {
-        const container = document.getElementById('nameList');
-        container.innerHTML = data.map(n => `<div class="list-item" onclick="toggleItem(this)"><input type="checkbox" class="chk" value="${n}"><span>${n}</span></div>`).join('');
-        updateCount();
-    }
-
-    function toggleItem(div) {
-        const cb = div.querySelector('input');
-        if(event.target.type !== 'checkbox') cb.checked = !cb.checked;
-        updateCount();
-    }
-
-    function updateCount() {
-        const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
-        const batchSection = document.getElementById('batchSection');
-        const grid = document.getElementById('batchButtons');
+    function convertNIP() {
+        const input = document.getElementById('inputArea').value.trim();
+        const outputArea = document.getElementById('outputArea');
+        const resultInfo = document.getElementById('resultInfo');
         
-        if(selected.length > 0) {
-            batchSection.style.display = 'block';
-            grid.innerHTML = '';
-            const batchSize = 20;
-            for (let i = 0; i < selected.length; i += batchSize) {
-                const batch = selected.slice(i, i + batchSize);
-                const btn = document.createElement('button');
-                btn.className = 'main-btn btn-batch-copy';
-                btn.innerText = `Salin Orang ${i+1}-${Math.min(i + batchSize, selected.length)}`;
-                btn.onclick = () => copyBatch(batch);
-                grid.appendChild(btn);
+        if (!input) {
+            alert('⚠️ Silakan masukkan data terlebih dahulu!');
+            return;
+        }
+
+        const lines = input.split('\n');
+        const results = [];
+        let count = 0;
+
+        lines.forEach(line => {
+            if (!line.trim()) return;
+            
+            // Regex mencari pola NIP seperti ARN251-29xxx
+            const nipMatch = line.match(/[A-Z]+\d+[\-]?\d+/);
+            
+            if (nipMatch) {
+                const nip = nipMatch[0];
+                // TANDA '#' DIHAPUS DI SINI AGAR LANGSUNG BIRU DI WA
+                const formattedNIP = `@${nip}`; 
+                results.push(formattedNIP);
+                count++;
             }
+        });
+
+        if (results.length === 0) {
+            outputArea.value = '';
+            resultInfo.textContent = '❌ Tidak ada NIP yang ditemukan!';
+            resultInfo.style.color = '#e74c3c';
         } else {
-            batchSection.style.display = 'none';
+            outputArea.value = results.join('\n');
+            resultInfo.textContent = `✅ Berhasil mengkonversi ${count} NIP`;
+            resultInfo.style.color = 'var(--primary)';
         }
     }
 
-    function formatText(names) {
-        const useAt = document.getElementById('atTag').checked;
-        const useNum = document.getElementById('numTag').checked;
-        const pesan = document.getElementById('msgInput').value;
-        const formatted = names.map((n, i) => {
-            let res = useAt ? "@" + n : n;
-            return useNum ? (i+1) + ". " + res : res;
-        });
-        const namePart = useNum ? formatted.join('\n') : formatted.join(' ');
-        return pesan ? pesan + "\n\n" + namePart : namePart;
-    }
+    function copyResult() {
+        const text = document.getElementById('outputArea').value;
+        if (!text) {
+            alert('⚠️ Tidak ada hasil untuk disalin!');
+            return;
+        }
 
-    function copyBatch(names) {
-        const txt = formatText(names);
-        navigator.clipboard.writeText(txt).then(() => {
-            alert("✅ Teks Berhasil Disalin!\n\nSilakan buka WhatsApp dan Tempel (Paste) di grup.");
+        navigator.clipboard.writeText(text).then(() => {
+            alert('📋 Hasil berhasil disalin!\n\n💡 Tips: Paste di grup WA, lalu tekan SPASI di akhir teks agar tag berubah menjadi biru.');
+        }).catch(err => {
+            document.getElementById('outputArea').select();
+            document.execCommand('copy');
+            alert('📋 Hasil berhasil disalin!');
         });
     }
 
-    function sendWA() {
-        const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
-        if(selected.length === 0) return alert("Pilih nama!");
-        const txt = formatText(selected);
-        window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
+    function shareToWA() {
+        const text = document.getElementById('outputArea').value;
+        if (!text) {
+            alert('⚠️ Tidak ada hasil untuk dibagikan!');
+            return;
+        }
+        window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
     }
 
-    function filter() {
-        const q = document.getElementById('search').value.toLowerCase();
-        document.querySelectorAll('.list-item').forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
-        });
+    function clearAll() {
+        if(confirm('Apakah Anda yakin ingin menghapus semua data?')) {
+            document.getElementById('inputArea').value = '';
+            document.getElementById('outputArea').value = '';
+            document.getElementById('resultInfo').textContent = '';
+        }
     }
 
-    function toggleAll() {
-        const cbs = document.querySelectorAll('.chk');
-        if(cbs.length === 0) return;
-        let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
-        cbs.forEach(c => { if(c.parentElement.style.display !== 'none') c.checked = anyUnchecked; });
-        updateCount();
-    }
-
-    window.onload = () => {
-        const saved = localStorage.getItem('wa_db_wahyu');
-        if(saved) { render(JSON.parse(saved)); document.getElementById('rawInput').value = JSON.parse(saved).join('\n'); }
-    };
+    // Auto-load contoh untuk mempermudah tes
+    window.addEventListener('load', function() {
+        const exampleData = `1. NAMA ARN251-29xxx\n2. NAMA ARN251-30xxx`;
+        document.getElementById('inputArea').value = exampleData;
+    });
 </script>
+
 </body>
 </html>
