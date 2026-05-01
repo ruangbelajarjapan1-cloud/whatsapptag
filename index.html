@@ -162,7 +162,7 @@
         updateCount();
     }
 
-    function formatText(names, startIndex = 0) {
+ function formatText(names, startIndex = 0) {
         const useAt = document.getElementById('atTag').checked;
         const useNum = document.getElementById('numTag').checked;
         const pesan = document.getElementById('msgInput').value;
@@ -171,12 +171,17 @@
             if (useAt) {
                 const words = res.split(/\s+/);
                 if (words.length > 0) {
-                    const lastWord = words.pop(); 
+                    const lastWord = words.pop(); // Mengambil Nomor HP atau NIP di akhir
+                    const remainingName = words.join(' '); // Mengambil sisa kata di depan sebagai Nama
                     
+                    // Cek apakah lastWord mengandung huruf (NIP / ARN)
                     if (/[A-Za-z]/.test(lastWord)) {
+                        // Kondisi 1: Jika NIP -> Hasilnya @NIP#
                         res = '@' + lastWord + '#';
                     } else {
-                        res = (words.length > 0 ? words.join(' ') + ' ' : '') + '@' + lastWord;
+                        // Kondisi 2: Jika No HP -> Hasilnya @NAMA
+                        // (Jika input kebetulan tidak ada nama, tetap fallback ke nomornya)
+                        res = remainingName ? '@' + remainingName : '@' + lastWord;
                     }
                 }
             }
@@ -185,13 +190,6 @@
         
         const namePart = formatted.join('\n');
         return pesan ? pesan + "\n\n" + namePart : namePart;
-    }
-
-    function copyBatch(names, startIndex = 0) {
-        const txt = formatText(names, startIndex);
-        navigator.clipboard.writeText(txt).then(() => {
-            alert("✅ Teks Berhasil Disalin!\n\nSilakan Tempel di WA.\n- Nomor HP: Tekan Spasi di akhir.\n- NIP: Hapus tanda '#' di ujungnya.");
-        });
     }
 
     function sendWA() {
