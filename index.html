@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WA Tagger</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <!-- Link ke Manifest -->
     <link rel="manifest" href="manifest.json">
     
@@ -14,6 +15,7 @@
     <meta name="apple-mobile-web-app-title" content="WA Tagger">
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" content="#075e54">
+    
     <style>
         :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg); padding: 15px; margin: 0; color: #333; }
@@ -40,9 +42,15 @@
         .btn-wa { background-color: var(--accent); }
         .btn-batch-copy { background-color: #3498db; font-size: 11px; padding: 8px; }
         
-        /* Tambahan styling kecil agar list panduan lebih rapi */
+        /* Panduan Penggunaan */
         .modal-content ol { padding-left: 20px; margin-bottom: 15px; font-size: 14px; line-height: 1.5; }
         .modal-content li { margin-bottom: 8px; }
+        
+        /* Tambahan CSS untuk Tab dan Dropdown */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; background: #e0e0e0; font-weight: bold; color: #555; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(7, 94, 84, 0.3); }
+        .template-select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 14px; background: white; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -70,15 +78,28 @@
         </div>
     </div>
 
+   <!-- IDE 1: Tab Kategori -->
+    <div class="tabs">
+        <button class="tab-btn active" id="tab-belum" onclick="switchTab('belum')">📚 Belum Mengerjakan</button>
+        <button class="tab-btn" id="tab-remedial" onclick="switchTab('remedial')">🔄 Remedial</button>
+    </div>
+
     <div class="box">
-        <label>1. Input Data Nama & (No HP / NIP):</label>
-        <textarea id="rawInput" rows="4" placeholder="Contoh:&#10;YUSUF 6281224961895&#10;194. ZICO AL GHANI ARN-22222222"></textarea>
+        <label>1. Input Data Nama & ARN / No HP:</label>
+        <textarea id="rawInput" rows="4" placeholder="Paste data santri di sini..."></textarea>
         <button class="btn-save" type="button" onclick="saveData()">💾 SIMPAN DAFTAR</button>
     </div>
 
-    <label>2. Pesan (Opsional):</label>
-    <textarea id="msgInput" rows="2" placeholder="Tulis pesan pengantar..."></textarea>
-
+    <!-- IDE 2: Dropdown Template Pesan -->
+    <label>2. Pesan Pengantar:</label>
+    <select id="templateSelect" class="template-select" onchange="applyTemplate()">
+        <option value="">-- Pilih Template Sapaan --</option>
+        <option value="Bismillah, tafadhol kepada para santri berikut untuk segera mengerjakan Evaluasi Harian sebelum batas waktu habis ya. Baarakallahu fiikum.">📌 Evaluasi Harian (Belum Mengerjakan)</option>
+        <option value="Tadzkirah: Berikut adalah daftar santri yang belum menyelesaikan Evaluasi Pekanan. Mohon segera dikerjakan agar tidak menumpuk.">📌 Evaluasi Pekanan (Belum Mengerjakan)</option>
+        <option value="Bismillah, bagi santri yang namanya tertera di bawah ini, Yuk segera dituntaskan ujian Remedial-nya. Semangat! Baarakallahu fiikum.">⚠️ Panggilan Remedial</option>
+    </select>
+    <textarea id="msgInput" rows="3" placeholder="Atau tulis pesan manual di sini..."></textarea>
+    
     <div class="settings">
         <label class="toggle"><input type="checkbox" id="atTag" checked> Pakai '@'</label>
         <label class="toggle"><input type="checkbox" id="numTag"> No. Urut</label>
@@ -101,8 +122,27 @@
 </div>
 
 <script>
-    function toggleHelp(show) { document.getElementById('helpModal').style.display = show ? 'block' : 'none'; }
-    
+    let currentCategory = 'belum'; // Default tab aktif saat pertama buka
+
+    // === MODAL & UI FUNCTIONS ===
+    function toggleHelp(show) { 
+        document.getElementById('helpModal').style.display = show ? 'block' : 'none'; 
+    }
+
+    function switchTab(cat) {
+        currentCategory = cat;
+        document.getElementById('tab-belum').classList.remove('active');
+        document.getElementById('tab-remedial').classList.remove('active');
+        document.getElementById('tab-' + cat).classList.add('active');
+        loadData();
+    }
+
+    function applyTemplate() {
+        const val = document.getElementById('templateSelect').value;
+        if(val) document.getElementById('msgInput').value = val;
+    }
+
+    // === DATA MANAGEMENT ===
     function saveData() {
         const raw = document.getElementById('rawInput').value;
         const items = raw.split('\n')
@@ -114,11 +154,24 @@
             return;
         }
 
-        localStorage.setItem('wa_db_wahyu', JSON.stringify(items));
+        localStorage.setItem('wa_db_hsi_' + currentCategory, JSON.stringify(items));
         render(items);
-        alert("✅ Data berhasil disimpan!");
+        alert(`✅ Data kelompok "${currentCategory === 'belum' ? 'Belum Mengerjakan' : 'Remedial'}" berhasil disimpan!`);
     }
 
+    function loadData() {
+        const saved = localStorage.getItem('wa_db_hsi_' + currentCategory);
+        if(saved) { 
+            const parsedData = JSON.parse(saved);
+            render(parsedData); 
+            document.getElementById('rawInput').value = parsedData.join('\n'); 
+        } else {
+            render([]);
+            document.getElementById('rawInput').value = '';
+        }
+    }
+
+    // === RENDERING & INTERACTION ===
     function render(data) {
         const container = document.getElementById('nameList');
         container.innerHTML = data.map(n => `<div class="list-item" onclick="toggleItem(this, event)"><input type="checkbox" class="chk" value="${n}"><span>${n}</span></div>`).join('');
@@ -131,6 +184,28 @@
             cb.checked = !cb.checked;
         }
         updateCount();
+    }
+
+    function toggleAll() {
+        const cbs = document.querySelectorAll('.chk');
+        if(cbs.length === 0) {
+            alert("⚠️ Belum ada daftar yang bisa dipilih!");
+            return;
+        }
+        let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
+        cbs.forEach(c => { 
+            if(c.parentElement.style.display !== 'none') {
+                c.checked = anyUnchecked; 
+            }
+        });
+        updateCount();
+    }
+
+    function filter() {
+        const q = document.getElementById('search').value.toLowerCase();
+        document.querySelectorAll('.list-item').forEach(item => {
+            item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
     }
 
     function updateCount() {
@@ -155,23 +230,8 @@
         }
     }
 
-    function toggleAll() {
-        const cbs = document.querySelectorAll('.chk');
-        if(cbs.length === 0) {
-            alert("⚠️ Belum ada daftar yang bisa dipilih!");
-            return;
-        }
-        
-        let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
-        cbs.forEach(c => { 
-            if(c.parentElement.style.display !== 'none') {
-                c.checked = anyUnchecked; 
-            }
-        });
-        updateCount();
-    }
-
- function formatText(names, startIndex = 0) {
+    // === FORMATTING & SENDING ===
+    function formatText(names, startIndex = 0) {
         const useAt = document.getElementById('atTag').checked;
         const useNum = document.getElementById('numTag').checked;
         const pesan = document.getElementById('msgInput').value;
@@ -180,16 +240,12 @@
             if (useAt) {
                 const words = res.split(/\s+/);
                 if (words.length > 0) {
-                    const lastWord = words.pop(); // Mengambil Nomor HP atau NIP di akhir
-                    const remainingName = words.join(' '); // Mengambil sisa kata di depan sebagai Nama
+                    const lastWord = words.pop(); 
+                    const remainingName = words.join(' '); 
                     
-                    // Cek apakah lastWord mengandung huruf (NIP / ARN)
                     if (/[A-Za-z]/.test(lastWord)) {
-                        // Kondisi 1: Jika NIP -> Hasilnya @NIP#
                         res = '@' + lastWord + '#';
                     } else {
-                        // Kondisi 2: Jika No HP -> Hasilnya @NAMA
-                        // (Jika input kebetulan tidak ada nama, tetap fallback ke nomornya)
                         res = remainingName ? '@' + remainingName : '@' + lastWord;
                     }
                 }
@@ -199,6 +255,13 @@
         
         const namePart = formatted.join('\n');
         return pesan ? pesan + "\n\n" + namePart : namePart;
+    }
+
+    function copyBatch(names, startIndex = 0) {
+        const txt = formatText(names, startIndex);
+        navigator.clipboard.writeText(txt).then(() => {
+            alert("✅ Teks Berhasil Disalin!\n\nSilakan Tempel di WA.\n- Nomor HP: Tekan Spasi di akhir.\n- NIP/ARN: Hapus tanda '#' di ujungnya.");
+        });
     }
 
     function sendWA() {
@@ -211,24 +274,12 @@
         window.open("https://wa.me/?text=" + encodeURIComponent(txt), "_blank");
     }
 
-    function filter() {
-        const q = document.getElementById('search').value.toLowerCase();
-        document.querySelectorAll('.list-item').forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
-        });
-    }
-
+    // === INITIALIZATION ===
     window.onload = () => {
-        const saved = localStorage.getItem('wa_db_wahyu');
-        if(saved) { 
-            const parsedData = JSON.parse(saved);
-            render(parsedData); 
-            document.getElementById('rawInput').value = parsedData.join('\n'); 
-        }
+        loadData();
     };
-</script>
-    <script>
-    // Daftarkan Service Worker
+
+    // Daftarkan Service Worker untuk PWA
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
