@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WA Tagger</title>
+    <title>WA Tagger Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Link ke Manifest -->
+    <!-- Link ke Manifest PWA -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Meta tag khusus untuk iOS / Apple -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="WA Tagger">
@@ -17,116 +15,145 @@
     <meta name="theme-color" content="#075e54">
     
     <style>
-        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; }
+        :root { --primary: #075e54; --secondary: #128c7e; --accent: #25D366; --bg: #f0f2f5; --danger: #e74c3c; }
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg); padding: 15px; margin: 0; color: #333; }
         .container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; }
-        .btn-help { position: absolute; top: 20px; right: 20px; background: #ddd; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; color: #555; }
-        h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; }
+        .btn-help { position: absolute; top: 20px; right: 20px; background: #ddd; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-weight: bold; font-size: 18px; color: #555; transition: 0.2s; }
+        .btn-help:hover { background: #ccc; }
+        h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; font-weight: 700; }
         .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
-        #helpModal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal-content { background: white; margin: 15% auto; padding: 20px; border-radius: 12px; width: 85%; max-width: 400px; }
-        .btn-close { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; }
-        .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px solid #c8e6c9; margin-bottom: 15px; }
-        label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 14px; }
-        textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; resize: none; }
-        .btn-save { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .settings { display: flex; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 13px; }
-        .toggle { display: flex; align-items: center; cursor: pointer; }
-        .list-container { max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fafafa; margin-bottom: 15px; }
-        .list-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
-        .list-item input { margin-right: 15px; transform: scale(1.3); }
-        .batch-area { margin-top: 10px; border-top: 2px dashed #ddd; padding-top: 15px; }
-        .batch-label { font-size: 13px; font-weight: bold; color: #555; margin-bottom: 10px; display: block; text-align: center;}
-        .batch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; margin-bottom: 10px; }
-        .btn-wa { background-color: var(--accent); }
-        .btn-batch-copy { background-color: #3498db; font-size: 11px; padding: 8px; }
         
-        /* Panduan Penggunaan */
-        .modal-content ol { padding-left: 20px; margin-bottom: 15px; font-size: 14px; line-height: 1.5; }
-        .modal-content li { margin-bottom: 8px; }
+        /* Tab UI/UX */
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; background: #f9f9f9; padding: 5px; border-radius: 10px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; background: transparent; font-weight: bold; color: #777; transition: 0.3s; font-size: 13px; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(7, 94, 84, 0.2); }
         
-        /* Tambahan CSS untuk Tab dan Dropdown */
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; background: #e0e0e0; font-weight: bold; color: #555; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(7, 94, 84, 0.3); }
-        .template-select { width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: inherit; font-size: 14px; background: white; cursor: pointer; }
+        /* Kotak Input */
+        .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px dashed var(--secondary); margin-bottom: 15px; }
+        label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 13px; color: #444; }
+        textarea, select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; transition: border 0.3s; }
+        textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 2px rgba(18, 140, 126, 0.1); }
+        textarea { resize: none; }
+        
+        .btn-save { background: white; color: var(--primary); border: 1px solid var(--primary); padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        .btn-save:hover { background: #e8f5e9; }
+        
+        .settings { display: flex; gap: 15px; margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 8px; font-size: 13px; border: 1px solid #eee; }
+        .toggle { display: flex; align-items: center; cursor: pointer; color: #555; }
+        .list-container { max-height: 220px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; background: #fafafa; margin-bottom: 15px; }
+        .list-item { display: flex; align-items: center; padding: 12px 10px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .list-item:hover { background: #f0f0f0; }
+        .list-item input { margin-right: 12px; transform: scale(1.2); accent-color: var(--primary); }
+        
+        .batch-area { margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px; }
+        .batch-label { font-size: 12px; font-weight: bold; color: #666; margin-bottom: 10px; display: block; text-align: center; }
+        .batch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        .main-btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 14px; cursor: pointer; color: white; margin-bottom: 10px; transition: opacity 0.2s; }
+        .main-btn:active { opacity: 0.8; }
+        .btn-wa { background-color: var(--accent); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        .btn-batch-copy { background-color: #3498db; font-size: 12px; padding: 10px; }
+        
+        /* Toast Notification UI/UX */
+        #toast { visibility: hidden; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 8px; padding: 16px; position: fixed; z-index: 1000; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: bottom 0.3s, opacity 0.3s; opacity: 0; }
+        #toast.show { visibility: visible; bottom: 50px; opacity: 1; }
+        #toast.error { background-color: var(--danger); }
+        #toast.success { background-color: var(--primary); }
+
+        /* Modal Panduan */
+        #helpModal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); }
+        .modal-content { background: white; margin: 20% auto; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal-content h3 { color: var(--primary); margin-top: 0; font-size: 18px; }
+        .modal-content ol { padding-left: 20px; margin-bottom: 20px; font-size: 14px; line-height: 1.6; color: #444; }
+        .modal-content li { margin-bottom: 10px; }
+        .btn-close { background: #eee; color: #333; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <button class="btn-help" onclick="toggleHelp(true)">?</button>
-    <h2>WA Tagger Pro </h2>
+    <h2>WA Tagger Pro</h2>
     <div class="author">Design by セティアワン</div>
+
+    <!-- Toast Notification Element -->
+    <div id="toast">Notifikasi</div>
 
     <div id="helpModal">
         <div class="modal-content">
-            <h3 style="color: var(--primary); margin-top: 0;">Panduan Penggunaan:</h3>
+            <h3>Panduan Penggunaan</h3>
             <ol>
-                <li>Centang anggota yang ingin di-tag dari daftar.</li>
+                <li>Centang anggota yang ingin di-tag.</li>
                 <li><b>Pilih Metode Kirim:</b><br>
-                    👉 Klik <b>"Kirim Semua"</b> untuk langsung membuka WhatsApp.<br>
-                    👉 ATAU klik tombol biru <b>"Salin..."</b> jika ingin menempel (paste) manual di grup.
+                    👉 Klik <b>"Kirim Semua"</b> untuk membuka WhatsApp secara langsung.<br>
+                    👉 ATAU klik tombol biru <b>"Salin"</b> untuk paste manual di grup WA (lebih aman untuk daftar panjang).
                 </li>
                 <li><b>Trik Tag Biru di WA:</b><br>
-                    ✅ <b>Nomor HP:</b> Tekan tombol <b>Spasi</b> di akhir teks sebelum dikirim.<br>
-                    ✅ <b>NIP/ARN:</b> Hapus tanda <b>#</b> di ujung teks agar WA memunculkan pilihan nama kontak.
+                    ✅ <b>Nomor HP:</b> Tekan tombol <b>Spasi</b> di akhir teks.<br>
+                    ✅ <b>NIP/ARN:</b> Hapus tanda <b>#</b> di ujung teks.
                 </li>
             </ol>
-            <button class="btn-close" onclick="toggleHelp(false)">Tutup</button>
+            <button class="btn-close" onclick="toggleHelp(false)">Tutup Panduan</button>
         </div>
     </div>
 
-   <!-- IDE 1: Tab Kategori -->
+    <!-- Tab Kategori -->
     <div class="tabs">
-        <button class="tab-btn active" id="tab-belum" onclick="switchTab('belum')">📚 Belum Mengerjakan</button>
+        <button class="tab-btn active" id="tab-belum" onclick="switchTab('belum')">📚 Belum Evaluasi</button>
         <button class="tab-btn" id="tab-remedial" onclick="switchTab('remedial')">🔄 Remedial</button>
     </div>
 
     <div class="box">
-        <label>1. Input Data Nama & ARN / No HP:</label>
-        <textarea id="rawInput" rows="4" placeholder="Paste data santri di sini..."></textarea>
-        <button class="btn-save" type="button" onclick="saveData()">💾 SIMPAN DAFTAR</button>
+        <label>1. Paste Data (Nama & ARN / No HP):</label>
+        <textarea id="rawInput" rows="3" placeholder="Contoh:&#10;Abdullah ARN-12345&#10;Fulan 62812345678"></textarea>
+        <button class="btn-save" type="button" onclick="saveData()">💾 Simpan Data Lokal</button>
     </div>
 
-    <!-- IDE 2: Dropdown Template Pesan -->
-    <label>2. Pesan Pengantar:</label>
-    <select id="templateSelect" class="template-select" onchange="applyTemplate()">
-        <option value="">-- Pilih Template Sapaan --</option>
-        <option value="Bismillah, tafadhol kepada para santri berikut untuk segera mengerjakan Evaluasi Harian sebelum batas waktu habis ya. Baarakallahu fiikum.">📌 Evaluasi Harian (Belum Mengerjakan)</option>
-        <option value="Tadzkirah: Berikut adalah daftar santri yang belum menyelesaikan Evaluasi Pekanan. Mohon segera dikerjakan agar tidak menumpuk.">📌 Evaluasi Pekanan (Belum Mengerjakan)</option>
-        <option value="Bismillah, bagi santri yang namanya tertera di bawah ini, Yuk segera dituntaskan ujian Remedial-nya. Semangat! Baarakallahu fiikum.">⚠️ Panggilan Remedial</option>
+    <!-- Dropdown Template Pesan Sunnah -->
+    <label>2. Pesan Pengantar (Sunnah):</label>
+    <select id="templateSelect" onchange="applyTemplate()" style="margin-bottom: 10px;">
+        <option value="">-- Pilih Template Pesan --</option>
+        <option value="Bismillah. Mengingatkan kembali terkait keutamaan menuntut ilmu. Tafadhol bagi santri berikut untuk menyempatkan waktu mengerjakan Evaluasi Harian. Semoga Allah mudahkan. Baarakallahu fiikum.">🌱 Ev. Harian (Siang/Sore - Lembut)</option>
+        <option value="Bismillah. Waktu pengerjaan Evaluasi akan segera berakhir. Mengingatkan kepada nama-nama di bawah ini agar segera menyelesaikannya. Jangan sampai terlewat ya. Jazakumullahu khairan.">⏳ Ev. Harian (Malam/Urgent)</option>
+        <option value="Bismillah. Alhamdulillah kita telah menyelesaikan materi pekan ini. Tafadhol kepada santri berikut untuk mengerjakan Evaluasi Pekanan. Semoga mendapat hasil yang terbaik. Waffaqakumullah.">📖 Ev. Pekanan (Standard)</option>
+        <option value="Bismillah. Qadarullah wamaa syaa'a fa'ala, bagi yang namanya tertera di bawah ini, silakan untuk mengulang (remedial) evaluasinya. Tetap semangat dalam tholabul 'ilmi, semoga Allah berikan taufiq.">🔄 Remedial (Motivasi)</option>
     </select>
-    <textarea id="msgInput" rows="3" placeholder="Atau tulis pesan manual di sini..."></textarea>
+    <textarea id="msgInput" rows="3" placeholder="Pilih template di atas atau ketik manual di sini..."></textarea>
     
     <div class="settings">
-        <label class="toggle"><input type="checkbox" id="atTag" checked> Pakai '@'</label>
-        <label class="toggle"><input type="checkbox" id="numTag"> No. Urut</label>
+        <label class="toggle"><input type="checkbox" id="atTag" checked> Auto '@' Tag</label>
+        <label class="toggle"><input type="checkbox" id="numTag" checked> Penomoran (1, 2, 3..)</label>
     </div>
 
-    <label>3. Pilih Anggota:</label>
+    <label>3. Pilih Santri yang Di-tag:</label>
     <div style="display:flex; gap:10px; margin-bottom:10px;">
-        <input type="text" id="search" placeholder="Cari..." onkeyup="filter()" style="flex:1; padding:8px; border-radius:8px; border:1px solid #ddd;">
-        <button type="button" onclick="toggleAll()" style="padding:8px; border-radius:8px; border:none; cursor:pointer; font-weight: bold; background: #ddd;">Pilih Semua</button>
+        <input type="text" id="search" placeholder="Cari nama/ARN..." onkeyup="filter()">
+        <button type="button" onclick="toggleAll()" style="padding:10px 15px; border-radius:8px; border:none; cursor:pointer; font-weight: bold; background: #e0e0e0; font-size:12px;">Pilih Semua</button>
     </div>
     
     <div class="list-container" id="nameList"></div>
 
     <div class="batch-area" id="batchSection" style="display:none;">
-        <span class="batch-label">📋 Salin Per 20 Nama (Lebih Ampuh):</span>
+        <span class="batch-label">📋 Salin Per 20 Nama (Anti Error WA):</span>
         <div class="batch-grid" id="batchButtons"></div>
     </div>
 
-    <button class="main-btn btn-wa" type="button" onclick="sendWA()" style="margin-top:20px;">🚀 KIRIM SEMUA (LINK LANGSUNG)</button>
+    <button class="main-btn btn-wa" type="button" onclick="sendWA()" style="margin-top:15px;">🚀 BUKA & KIRIM KE WHATSAPP</button>
 </div>
 
 <script>
-    let currentCategory = 'belum'; // Default tab aktif saat pertama buka
+    let currentCategory = 'belum'; 
 
-    // === MODAL & UI FUNCTIONS ===
+    // === UI/UX FUNCTIONS (TOAST & MODAL) ===
     function toggleHelp(show) { 
         document.getElementById('helpModal').style.display = show ? 'block' : 'none'; 
+    }
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById("toast");
+        toast.innerText = message;
+        toast.className = "toast show " + type;
+        setTimeout(() => { toast.className = toast.className.replace("show", "").trim(); }, 3000);
     }
 
     function switchTab(cat) {
@@ -150,13 +177,13 @@
             .filter(n => n !== "");
         
         if(items.length === 0) {
-            alert("⚠️ Masukkan data terlebih dahulu!");
+            showToast("⚠️ Masukkan data terlebih dahulu!", "error");
             return;
         }
 
         localStorage.setItem('wa_db_hsi_' + currentCategory, JSON.stringify(items));
         render(items);
-        alert(`✅ Data kelompok "${currentCategory === 'belum' ? 'Belum Mengerjakan' : 'Remedial'}" berhasil disimpan!`);
+        showToast("✅ Daftar santri berhasil disimpan!");
     }
 
     function loadData() {
@@ -189,7 +216,7 @@
     function toggleAll() {
         const cbs = document.querySelectorAll('.chk');
         if(cbs.length === 0) {
-            alert("⚠️ Belum ada daftar yang bisa dipilih!");
+            showToast("⚠️ Belum ada data santri!", "error");
             return;
         }
         let anyUnchecked = Array.from(cbs).some(c => !c.checked && c.parentElement.style.display !== 'none');
@@ -221,7 +248,7 @@
                 const batch = selected.slice(i, i + batchSize);
                 const btn = document.createElement('button');
                 btn.className = 'main-btn btn-batch-copy';
-                btn.innerText = `Salin Orang ${i+1}-${Math.min(i + batchSize, selected.length)}`;
+                btn.innerText = `📋 Salin (${i+1} - ${Math.min(i + batchSize, selected.length)})`;
                 btn.onclick = () => copyBatch(batch, i); 
                 grid.appendChild(btn);
             }
@@ -260,14 +287,16 @@
     function copyBatch(names, startIndex = 0) {
         const txt = formatText(names, startIndex);
         navigator.clipboard.writeText(txt).then(() => {
-            alert("✅ Teks Berhasil Disalin!\n\nSilakan Tempel di WA.\n- Nomor HP: Tekan Spasi di akhir.\n- NIP/ARN: Hapus tanda '#' di ujungnya.");
+            showToast("✅ Teks tersalin! Paste di WA dan hapus tanda '#' pada ARN.", "success");
+        }).catch(() => {
+            showToast("❌ Gagal menyalin teks.", "error");
         });
     }
 
     function sendWA() {
         const selected = Array.from(document.querySelectorAll('.chk:checked')).map(c => c.value);
         if(selected.length === 0) {
-            alert("⚠️ Pilih minimal satu data dulu!");
+            showToast("⚠️ Pilih minimal satu nama dulu!", "error");
             return;
         }
         const txt = formatText(selected, 0);
@@ -279,12 +308,11 @@
         loadData();
     };
 
-    // Daftarkan Service Worker untuk PWA
+    // PWA Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('./sw.js')
-                .then(reg => console.log('Service Worker terdaftar!', reg))
-                .catch(err => console.error('Gagal daftar Service Worker', err));
+                .catch(err => console.error('SW Error:', err));
         });
     }
 </script>
