@@ -23,11 +23,6 @@
         h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; font-weight: 700; }
         .author { text-align: center; font-size: 12px; color: #888; margin-bottom: 20px; font-style: italic; }
         
-        /* Tab UI/UX */
-        .tabs { display: flex; gap: 10px; margin-bottom: 15px; background: #f9f9f9; padding: 5px; border-radius: 10px; }
-        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; background: transparent; font-weight: bold; color: #777; transition: 0.3s; font-size: 13px; }
-        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(7, 94, 84, 0.2); }
-        
         /* Kotak Input */
         .box { background: #e8f5e9; padding: 15px; border-radius: 10px; border: 1px dashed var(--secondary); margin-bottom: 15px; }
         label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 13px; color: #444; }
@@ -83,7 +78,7 @@
         <div class="modal-content">
             <h3>Panduan Penggunaan</h3>
             <ol>
-                <li>Centang anggota yang ingin di-tag.</li>
+                <li>Centang santri yang ingin di-tag.</li>
                 <li><b>Pilih Metode Kirim:</b><br>
                     👉 Klik <b>"Kirim Semua"</b> untuk membuka WhatsApp secara langsung.<br>
                     👉 ATAU klik tombol biru <b>"Salin"</b> untuk paste manual di grup WA (lebih aman untuk daftar panjang).
@@ -97,12 +92,6 @@
         </div>
     </div>
 
-    <!-- Tab Kategori -->
-    <div class="tabs">
-        <button class="tab-btn active" id="tab-belum" onclick="switchTab('belum')">📚 Belum Evaluasi</button>
-        <button class="tab-btn" id="tab-remedial" onclick="switchTab('remedial')">🔄 Remedial</button>
-    </div>
-
     <div class="box">
         <label>1. Paste Data (Nama & ARN / No HP):</label>
         <textarea id="rawInput" rows="3" placeholder="Contoh:&#10;Abdullah ARN-12345&#10;Fulan 62812345678"></textarea>
@@ -110,13 +99,12 @@
     </div>
 
     <!-- Dropdown Template Pesan Sunnah -->
-    <label>2. Pesan Pengantar (Sunnah):</label>
+    <label>2. Pesan Pengantar:</label>
     <select id="templateSelect" onchange="applyTemplate()" style="margin-bottom: 10px;">
         <option value="">-- Pilih Template Pesan --</option>
         <option value="Bismillah. Mengingatkan kembali terkait keutamaan menuntut ilmu. Tafadhol bagi santri berikut untuk menyempatkan waktu mengerjakan Evaluasi Harian. Semoga Allah mudahkan. Baarakallahu fiikum.">🌱 Ev. Harian (Siang/Sore - Lembut)</option>
         <option value="Bismillah. Waktu pengerjaan Evaluasi akan segera berakhir. Mengingatkan kepada nama-nama di bawah ini agar segera menyelesaikannya. Jangan sampai terlewat ya. Jazakumullahu khairan.">⏳ Ev. Harian (Malam/Urgent)</option>
         <option value="Bismillah. Alhamdulillah kita telah menyelesaikan materi pekan ini. Tafadhol kepada santri berikut untuk mengerjakan Evaluasi Pekanan. Semoga mendapat hasil yang terbaik. Waffaqakumullah.">📖 Ev. Pekanan (Standard)</option>
-        <option value="Bismillah. Qadarullah wamaa syaa'a fa'ala, bagi yang namanya tertera di bawah ini, silakan untuk mengulang (remedial) evaluasinya. Tetap semangat dalam tholabul 'ilmi, semoga Allah berikan taufiq.">🔄 Remedial (Motivasi)</option>
     </select>
     <textarea id="msgInput" rows="3" placeholder="Pilih template di atas atau ketik manual di sini..."></textarea>
     
@@ -142,8 +130,6 @@
 </div>
 
 <script>
-    let currentCategory = 'belum'; 
-
     // === UI/UX FUNCTIONS (TOAST & MODAL) ===
     function toggleHelp(show) { 
         document.getElementById('helpModal').style.display = show ? 'block' : 'none'; 
@@ -154,14 +140,6 @@
         toast.innerText = message;
         toast.className = "toast show " + type;
         setTimeout(() => { toast.className = toast.className.replace("show", "").trim(); }, 3000);
-    }
-
-    function switchTab(cat) {
-        currentCategory = cat;
-        document.getElementById('tab-belum').classList.remove('active');
-        document.getElementById('tab-remedial').classList.remove('active');
-        document.getElementById('tab-' + cat).classList.add('active');
-        loadData();
     }
 
     function applyTemplate() {
@@ -181,13 +159,14 @@
             return;
         }
 
-        localStorage.setItem('wa_db_hsi_' + currentCategory, JSON.stringify(items));
+        // Menyimpan data dengan key yang lebih sederhana
+        localStorage.setItem('wa_db_hsi_belum', JSON.stringify(items));
         render(items);
         showToast("✅ Daftar santri berhasil disimpan!");
     }
 
     function loadData() {
-        const saved = localStorage.getItem('wa_db_hsi_' + currentCategory);
+        const saved = localStorage.getItem('wa_db_hsi_belum');
         if(saved) { 
             const parsedData = JSON.parse(saved);
             render(parsedData); 
